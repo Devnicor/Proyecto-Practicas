@@ -1,0 +1,132 @@
+name: CI/CD [repository name]
+
+on:
+  push:
+    branches:
+      - production
+      - staging
+      - development
+
+env:
+  IMAGE_ID: "gcr.io/k8s-miaguila/[repository name]"
+  GCR: ${{ secrets.GCR_JSON_KEY }}
+
+jobs:
+  ci:
+    name: Build and Push
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Authenticate to Google Cloud
+      run: |-
+           echo $GCR | docker login -u _json_key --password-stdin https://gcr.io
+
+    - name: Build and Push the Development image
+      if: github.ref == 'refs/heads/development'
+      env:
+          TARGET: develop
+          NODE_ENV: development
+          DATABASE_URL: ${{ secrets.DEVELOPMENT_DATABASE_URL }}
+          API_KEY_1: ${{ secrets.DEVELOPMENT_API_KEY_1 }}
+          API_KEY_2: ${{ secrets.DEVELOPMENT_API_KEY_2 }}
+      run: |
+        docker build \
+          --build-arg NODE_ENV=$NODE_ENV \
+          --build-arg DATABASE_URL=$DATABASE_URL \
+          --build-arg API_KEY_1=$API_KEY_1 \
+          --build-arg API_KEY_2=$API_KEY_2 \
+          --tag $IMAGE_ID:develop-${GITHUB_SHA::7} \
+          --tag $TARGET .
+        # Push image
+        docker push $IMAGE_ID:develop-${GITHUB_SHA::7}
+    - name: Build and Push the Staging image
+      if: github.ref == 'refs/heads/staging'
+      env:
+          TARGET: staging
+          NODE_ENV: staging
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          API_KEY_1: ${{ secrets.STAGING_API_KEY_1 }}
+          API_KEY_2: ${{ secrets.STAGING_API_KEY_2 }}
+      run: |
+        docker build \
+          --build-arg NODE_ENV=$NODE_ENV \
+          --build-arg DATABASE_URL=$DATABASE_URL \
+          --build-arg API_KEY_1=$API_KEY_1 \
+          --build-arg API_KEY_2=$API_KEY_2 \
+          --tag $IMAGE_ID:staging-${GITHUB_SHA::7} \
+          --tag $TARGET .
+        # Push image
+        docker push $IMAGE_ID:staging-${GITHUB_SHA::7}
+    - name: Build and Push the Production image
+      if: github.ref == 'refs/heads/production'
+      env:
+          TARGET: prod
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          API_KEY_1: ${{ secrets.PRODUCTION_API_KEY_1 }}
+          API_KEY_2: ${{ secrets.PRODUCTION_API_KEY_2 }}
+      run: |
+        docker build \
+          --build-arg NODE_ENV=$NODE_ENV \
+          --build-arg DATABASE_URL=$DATABASE_URL \
+          --build-arg API_KEY_1=$API_KEY_1 \
+          --build-arg API_KEY_2=$API_KEY_2 \
+          --tag $IMAGE_ID:prod-${GITHUB_SHA::7} \
+          --tag $TARGET .
+        # Push image
+        docker push $IMAGE_ID:prod-${GITHUB_SHA::7}
+
+  cd:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: ci
+    env: 
+      GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Setup Kustomize
+      uses: imranismail/setup-kustomize@v1
+      with:
+        kustomize-version: "3.6.1"
+
+
+    - name: Update Development Resources
+        if : github.ref == 'refs/heads/development'
+        run: |
+          git clone https://MyEagle-Transport:$GITHUB_TOKEN@github.com/MyEagle-Transport/k8s-manifest infra
+          cd infra/[repository name]/overlays/dev
+          kustomize edit set image $IMAGE_ID:develop-${GITHUB_SHA::7}
+          cat kustomization.yaml
+    - name: Update Staging Resources
+        if : github.ref == 'refs/heads/staging'
+        run: |
+          git clone https://MyEagle-Transport:$GITHUB_TOKEN@github.com/MyEagle-Transport/k8s-manifest infra
+          cd infra/[repository name]/overlays/stg
+          kustomize edit set image $IMAGE_ID:staging-${GITHUB_SHA::7}
+          cat kustomization.yaml
+      - name: Update Production Resources
+        if : github.ref == 'refs/heads/production'
+        run: |
+          git clone https://MyEagle-Transport:$GITHUB_TOKEN@github.com/MyEagle-Transport/k8s-manifest infra
+          cd infra/[repository name]/overlays/prod
+          kustomize edit set image $IMAGE_ID:prod-${GITHUB_SHA::7}
+          cat kustomization.yaml
+
+    - name: Pushes to Infra Repo
+      id: push_directory
+      uses: cpina/github-action-push-to-another-repository@main
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.PAT_GITHUB }}
+      with:
+        source-directory: 'infra'
+        destination-github-username: 'MyEagle-Transport'
+        destination-repository-name: 'k8s-manifest'
+        user-email: action@github.com
+        target-branch: main
+        
