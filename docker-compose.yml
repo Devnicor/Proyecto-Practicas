@@ -22,35 +22,36 @@ services:
     networks:
       - api_nestjs
 
-  db:
-    image: postgres:13.5
-    container_name: postgresdb
-    restart: always
-    environment:
-      - POSTGRES_USER=myeagle
-      - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_DB=nestjsScaffold
-    volumes:
-      - db:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
+  #  db:
+  #    image: postgres:13.5
+  #    container_name: postgresdb
+  #    restart: always
+  #    environment:
+  #      - POSTGRES_USER=myeagle
+  #      - POSTGRES_PASSWORD=mypassword
+  #      - POSTGRES_DB=nestjsScaffold
+  #    volumes:
+  #      - db:/var/lib/postgresql/data
+  #    ports:
+  #      - '5432:5432'
 
-#  db:
-#    image: mongo:latest
-#    container_name: mongodb
-#    restart: always
-#    ports:
-#      - 27017:27017
-#    environment:
-#      - MONGO_DATA_DIR=/data/db
-#      - MONG_LOG_DIR=/dev/null
-#    volumes:
-#      - db:/data/db
-#    networks:
-#      - api_nestjs
+  db:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONG_LOG_DIR=/dev/null
+    volumes:
+      - db:/data/db
+    networks:
+      - api_nestjs
 
 volumes:
   db:
+
 
 networks:
   api_nestjs:

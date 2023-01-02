@@ -6,7 +6,6 @@ module.exports = {
   },
   plugins: [
     '@typescript-eslint/eslint-plugin',
-    'hexagonal-architecture',
   ],
   extends: [
     'plugin:@typescript-eslint/recommended',
@@ -29,9 +28,7 @@ module.exports = {
   overrides: [
     {
       files: ["src/**/*.ts"],
-      rules: {
-        "hexagonal-architecture/enforce": ["error"],
-      },
+
     },
   ],
 };

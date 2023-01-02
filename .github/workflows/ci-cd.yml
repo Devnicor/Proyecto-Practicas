@@ -1,4 +1,4 @@
-name: CI/CD [repository name]
+name: CI/CD trip-tracking-api
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - development
 
 env:
-  IMAGE_ID: "gcr.io/k8s-miaguila/[repository name]"
+  IMAGE_ID: "gcr.io/k8s-miaguila/trip-tracking-api"
   GCR: ${{ secrets.GCR_JSON_KEY }}
 
 jobs:
@@ -100,21 +100,21 @@ jobs:
         if : github.ref == 'refs/heads/development'
         run: |
           git clone https://MyEagle-Transport:$GITHUB_TOKEN@github.com/MyEagle-Transport/k8s-manifest infra
-          cd infra/[repository name]/overlays/dev
+          cd infra/trip-tracking-api/overlays/dev
           kustomize edit set image $IMAGE_ID:develop-${GITHUB_SHA::7}
           cat kustomization.yaml
     - name: Update Staging Resources
         if : github.ref == 'refs/heads/staging'
         run: |
           git clone https://MyEagle-Transport:$GITHUB_TOKEN@github.com/MyEagle-Transport/k8s-manifest infra
-          cd infra/[repository name]/overlays/stg
+          cd infra/trip-tracking-api/overlays/stg
           kustomize edit set image $IMAGE_ID:staging-${GITHUB_SHA::7}
           cat kustomization.yaml
       - name: Update Production Resources
         if : github.ref == 'refs/heads/production'
         run: |
           git clone https://MyEagle-Transport:$GITHUB_TOKEN@github.com/MyEagle-Transport/k8s-manifest infra
-          cd infra/[repository name]/overlays/prod
+          cd infra/trip-tracking-api/overlays/prod
           kustomize edit set image $IMAGE_ID:prod-${GITHUB_SHA::7}
           cat kustomization.yaml
 

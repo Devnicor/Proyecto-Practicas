@@ -1,4 +1,3 @@
-/* eslint-disable hexagonal-architecture/enforce */
 import { ContextInteractor } from './interactor.types';
 
 export default abstract class Interactor {
