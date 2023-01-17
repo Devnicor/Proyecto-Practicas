@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { App } from '../domain/app';
-import { HealthCheckInteractor } from './health-check.interactor';
+import { TrackingInteractor } from './tracking.interactor';
 import { AppMock } from '../domain/app.mock';
 
 describe('HealthCheckInteractor', () => {
-  let interactor: HealthCheckInteractor;
+  let tinteractor: TrackingInteractor;
 
   beforeEach(async () => {
     const AppProvider = {
@@ -12,26 +12,29 @@ describe('HealthCheckInteractor', () => {
       useExisting: App,
     };
     const module: TestingModule = await Test.createTestingModule({
-      providers: [HealthCheckInteractor, AppProvider],
+      providers: [TrackingInteractor, AppProvider],
     })
       .overrideProvider('AppRepository')
       .useClass(AppMock)
       .compile();
-    interactor = module.get<HealthCheckInteractor>(HealthCheckInteractor);
+    tinteractor = module.get<TrackingInteractor>(TrackingInteractor);
   });
 
   describe('run', () => {
     it('should return Service is Up!', async () => {
       const mockResult = {
         data: {
-          message: 'Service is Up!',
+          message: 'My first tracking',
+          location: [0.0, 0.0],
+          user_id: '12234',
+          ontrip: false,
         },
         fail: {
           error: null,
         },
       };
 
-      expect(await interactor.run()).toEqual(mockResult);
+      expect(await tinteractor.run()).toEqual(mockResult);
     });
   });
 });
