@@ -13,6 +13,7 @@ async function main() {
       date: new Date(),
       latitude: -63.6344,
       longitude: -40.7635,
+      ontrip: false,
     },
   });
   console.log(track);

@@ -3,7 +3,7 @@ import { App } from '../domain/app';
 import { TrackingInteractor } from './tracking.interactor';
 import { AppMock } from '../domain/app.mock';
 
-describe('HealthCheckInteractor', () => {
+describe('TrackingCheckInteractor', () => {
   let tinteractor: TrackingInteractor;
 
   beforeEach(async () => {

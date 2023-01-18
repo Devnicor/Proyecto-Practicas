@@ -41,4 +41,5 @@ model tracking {
   date      DateTime
   latitude  Float
   longitude Float
+  ontrip    Boolean
 }
