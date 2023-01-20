@@ -2,7 +2,6 @@ import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './infrastructure/app.controller';
 import { AuthModule } from '../auth/auth.module';
-import { TrackingModule } from 'src/tracking/tracking.module';
 import { AuthMiddleware } from '../middleware/auth.middleware';
 import { HealthCheckInteractor } from './application/health-check.interactor';
 import { App } from './domain/app';
@@ -16,7 +15,6 @@ import config from '.../../config';
       isGlobal: true,
     }),
     AuthModule,
-    TrackingModule,
   ],
   controllers: [AppController],
   providers: [
