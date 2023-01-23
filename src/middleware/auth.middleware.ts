@@ -1,4 +1,3 @@
-/* eslint-disable hexagonal-architecture/enforce */
 import {
   Injectable,
   NestMiddleware,

@@ -4,7 +4,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import moment from 'moment';
 import { ConfigType } from '@nestjs/config';
-import config from '.../../config';
+import config from 'config';
 import { request } from 'node:https';
 import { Prisma } from 'pruebaprisma';
 import _ from 'lodash';

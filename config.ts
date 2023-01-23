@@ -7,6 +7,7 @@ export default registerAs('config', () => {
       name: process.env.DATABASE_URL,
     },
     apikey1: process.env.API_KEY_1,
+    apikey2: process.env.API_KEY_2,
     url_gate: 'http://localhost:3044',
     fulfillmentApi: 'https://driver-logs.miaguila.com/api/v1/gps_tracking',
   };

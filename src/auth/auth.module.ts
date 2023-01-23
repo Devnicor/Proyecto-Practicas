@@ -1,4 +1,3 @@
-/* eslint-disable hexagonal-architecture/enforce */
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './domain/auth.service';
