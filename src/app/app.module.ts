@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 //import Joi from 'joi';
 import { AppController } from './infrastructure/app.controller';
 import { AuthModule } from '../auth/auth.module';
-import { TrackingModule } from 'src/tracking/tracking.module';
+import { TrackingModule } from '../tracking/tracking.module';
 import { AuthMiddleware } from '../middleware/auth.middleware';
 import { HealthCheckInteractor } from './application/health-check.interactor';
 import { App } from './domain/app';
@@ -43,6 +43,5 @@ import { TrackingIController } from './infrastructure/tracking.interactor.contro
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).exclude('health').forRoutes('');
-    consumer.apply(AuthMiddleware).exclude('track').forRoutes('test');
   }
 }

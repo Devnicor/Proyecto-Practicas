@@ -1,8 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import config from 'config';
 
 @Injectable()
 export class AuthService {
-  private apiKeys: string[] = [process.env.API_KEY_1, process.env.API_KEY_2];
+  constructor(
+    @Inject(config.KEY) private configService: ConfigType<typeof config>,
+  ) {}
+  private apiKeys: string[] = [
+    this.configService.apikey1,
+    this.configService.apikey2,
+  ];
 
   validateApiKey(apiKey: string) {
     return this.apiKeys.find((key) => apiKey === key);
