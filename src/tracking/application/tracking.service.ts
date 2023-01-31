@@ -21,7 +21,9 @@ const geo = require('georedis').initialize(client, {
 const drivers = geo.addSet('drivers');
 
 console.log(JSON.stringify(drivers));
-console.log('Por fin sirve esta vaina');
+const test = new Prisma();
+const reff = test.Test();
+console.log(reff);
 
 @Injectable()
 export class TrackingService {
@@ -44,10 +46,6 @@ export class TrackingService {
           message: 'Missing car_id',
         });
       }
-
-      const test = new Prisma();
-      const reff = test.Test();
-      console.log(reff);
 
       const apiKey = this.configService.apikey1;
       const url = this.configService.url_gate;
