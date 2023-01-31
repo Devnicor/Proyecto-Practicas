@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { App } from '../domain/app';
+import { App } from '../../app/domain/app';
 import { TrackingInteractor } from './tracking.interactor';
-import { AppMock } from '../domain/app.mock';
+import { AppMock } from '../../app/domain/app.mock';
 
 describe('TrackingCheckInteractor', () => {
   let tinteractor: TrackingInteractor;

@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import Interactor from '../../common/base/interactor';
 import { ContextInteractor } from '../../common/base/interactor.types';
-import AppRepository from '../domain/app.repository';
+import TrackRepository from '../domain/tracking.repository';
 
 @Injectable()
 export class TrackingInteractor extends Interactor {
-  constructor(@Inject('AppRepository') private repository: AppRepository) {
+  constructor(@Inject('TrackRepository') private repository: TrackRepository) {
     super();
   }
 

@@ -10,4 +10,13 @@ export class TrackingController {
     const tracking = this.trackingService.PostData();
     return tracking;
   }
+
+  @Get('messages')
+  getMessages() {
+    return {
+      Message: 'Hola mundo',
+      Date: 'Fecha de hoy ' + new Date().toDateString(),
+      Number: Math.floor(Math.random() * 20),
+    };
+  }
 }

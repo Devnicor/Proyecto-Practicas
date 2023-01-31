@@ -1,13 +1,27 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable, Inject } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import moment from 'moment';
 import { ConfigType } from '@nestjs/config';
 import config from 'config';
+import { Client } from 'redis-om';
+import { createClient } from 'redis';
 import { request } from 'node:https';
 import { Prisma } from 'pruebaprisma';
 import _ from 'lodash';
+
+const redis = createClient();
+redis.connect();
+const client = new Client().use(redis);
+const geo = require('georedis').initialize(client, {
+  zset: 'locations',
+  nativeGeo: true,
+});
+const drivers = geo.addSet('drivers');
+
+console.log(JSON.stringify(drivers));
+console.log('Por fin sirve esta vaina');
 
 @Injectable()
 export class TrackingService {
@@ -16,13 +30,6 @@ export class TrackingService {
   ) {}
 
   PostData() {
-    const redis = require('redis');
-    const geo = require('georedis').initialize(redis, {
-      zset: 'locations',
-      nativeGeo: true,
-    });
-    const drivers = geo.addSet('drivers');
-
     const record = (req, res) => {
       if (!req.body.lat || !req.body.lng) {
         return res.status(HttpStatus.BAD_REQUEST).json({
@@ -40,6 +47,7 @@ export class TrackingService {
 
       const test = new Prisma();
       const reff = test.Test();
+      console.log(reff);
 
       const apiKey = this.configService.apikey1;
       const url = this.configService.url_gate;
@@ -128,23 +136,23 @@ export class TrackingService {
         cb();
       });
 
-      const time = new Promise((cb: any): any => {
-        if (heal >= global._min_time_minutes_for_disconnected) {
-          return cb(null, heal);
-        }
-        redis.set(
-          `$_time_${req.user._id}`,
-          moment(req.body.time).toISOString(),
-          'EX',
-          vars._min_time_minutes_for_disconnected * 60,
-          function (err: any, reply: any) {
-            if (err) {
-              return cb(err);
-            }
-            return cb(null, reply);
-          },
-        );
-      });
+      // const time = new Promise((cb: any): any => {
+      //   if (heal >= global._min_time_minutes_for_disconnected) {
+      //     return cb(null, heal);
+      //   }
+      //   redis.set(
+      //     `$_time_${req.user._id}`,
+      //     moment(req.body.time).toISOString(),
+      //     'EX',
+      //     vars._min_time_minutes_for_disconnected * 60,
+      //     function (err: any, reply: any) {
+      //       if (err) {
+      //         return cb(err);
+      //       }
+      //       return cb(null, reply);
+      //     },
+      //   );
+      // });
 
       const newFulfillemnt = new Promise((cb: any): void => {
         req.body.driver_id = req.user._id;
@@ -178,19 +186,28 @@ export class TrackingService {
         loccation,
         tracking,
         tracking_min,
-        time,
+        //time,
         newFulfillemnt,
-      ]).then((results) => {
-        if (_.get(results, 'tracking.error')) {
-          return res.status(HttpStatus.BAD_REQUEST).send(results);
-        }
-        if (_.get(results, 'location.error') || _.get(results, 'time.error')) {
-          return res.status(HttpStatus.BAD_REQUEST).send(results || results);
-        }
-        res.status(HttpStatus.OK).send({
-          result: true,
+      ])
+        .then((results) => {
+          if (_.get(results, 'tracking.error')) {
+            return res.status(HttpStatus.BAD_REQUEST).send(results);
+          }
+          if (
+            _.get(results, 'location.error') ||
+            _.get(results, 'time.error')
+          ) {
+            return res.status(HttpStatus.BAD_REQUEST).send(results || results);
+          }
+          res.status(HttpStatus.OK).send({
+            result: true,
+          });
+        })
+        .catch((err) => {
+          if (err) {
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(err);
+          }
         });
-      });
       record(reff, res);
     };
   }
