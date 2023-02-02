@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { Faker } from '@faker-js/faker';
+
 @Injectable()
 export class Prisma {
+  prismaClient = new PrismaClient();
   Test() {
     async function main(): Promise<void> {
-      const prismaClient = new PrismaClient();
-      const track = await prismaClient.tracking.create({
+      const track = await this.prismaClient.tracking.create({
         data: {
           user_id: '3dget456gy',
           car_id: 'RFDG43GT',
@@ -17,9 +19,16 @@ export class Prisma {
           ontrip: false,
         },
       });
-      console.log(track);
+      console.log(track.car_id);
     }
 
-    main();
+    main()
+      .catch(async (e) => {
+        console.error(e);
+        process.exit(1);
+      })
+      .finally(async () => {
+        await this.prismaClient.$disconnect();
+      });
   }
 }
