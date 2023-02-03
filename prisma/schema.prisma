@@ -39,7 +39,7 @@ model tracking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   date      DateTime
-  latitude  Float
-  longitude Float
+  latitude  String
+  longitude String
   ontrip    Boolean
 }
