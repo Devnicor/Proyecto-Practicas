@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { TrackingService } from '../application/tracking.service';
 
 @Controller()
@@ -6,11 +6,17 @@ export class TrackingController {
   constructor(private readonly trackingService: TrackingService) {}
 
   @Get('proyect')
-  track() {
-    const tracking = this.trackingService.PostData();
-    return tracking;
+  async track() {
+    const tracking = this.trackingService.postData();
+    return {
+      message: 'tracking',
+    };
   }
 
+  @Post('proyect/tracking')
+  result() {
+    console.log('hola');
+  }
   @Get('messages')
   getMessages() {
     return {
