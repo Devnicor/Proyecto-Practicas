@@ -13,10 +13,16 @@ export class TrackingController {
     };
   }
 
-  @Post('proyect/tracking')
+  @Get('proyect/tracking')
   result() {
     console.log('hola');
   }
+
+  @Post('proyect/tracking')
+  endpoint() {
+    console.log('checked');
+  }
+
   @Get('messages')
   getMessages() {
     return {

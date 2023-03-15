@@ -3,13 +3,14 @@
 
 import { Injectable, Inject } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
-import moment from 'moment';
+import * as moment from 'moment';
 import { ConfigType } from '@nestjs/config';
 import config from 'config';
 import { Client } from 'redis-om';
 import { createClient } from 'redis';
 import { PrismaClient, tracking } from '@prisma/client';
 import _ from 'lodash';
+import fetch from 'node-fetch';
 import { response } from 'express';
 
 @Injectable()
@@ -20,8 +21,7 @@ export class TrackingService {
 
   async postData() {
     const prisma = new PrismaClient();
-
-    const query = await prisma.tracking.findMany();
+    const query = await prisma.tracking.findFirst();
     const redisClient = createClient({
       url: 'redis://localhost6379',
     });
@@ -38,17 +38,17 @@ export class TrackingService {
     const app = this.configService.app;
     console.log(drivers);
 
-    const record = (req: typeof query, res: any) => {
-      if (!req[10] || !req[10].longitude) {
+    const record = (req: tracking, res: any) => {
+      if (!req.latitude || !req.longitude) {
         return res.status(HttpStatus.BAD_REQUEST);
       }
-      if (!req[10].date) {
-        req[10].date = moment().toDate();
+      if (!req.date) {
+        req.date = moment().toDate();
       }
-      if (!req[10].car_id) {
+      if (!req.car_id) {
         return res.status(HttpStatus.BAD_REQUEST);
       }
-      const diff = moment().diff(moment(req[10].date));
+      const diff = moment().diff(moment(req.date));
       const comp = moment.duration(diff);
       const heal = Math.abs(comp.asMinutes());
       console.log(heal);
@@ -57,10 +57,10 @@ export class TrackingService {
           return heal;
         }
         drivers.addLocation(
-          req[10].user_id,
+          req.user_id,
           {
-            latitude: req[10].latitude,
-            longitude: req[10].longitude,
+            latitude: req.latitude,
+            longitude: req.longitude,
           },
           function (error: any, reply: any) {
             if (error) {
@@ -73,10 +73,8 @@ export class TrackingService {
       };
 
       const tracking = () => {
-        req[10].user_id;
-        [req[10].latitude, req[10].longitude];
         const postData = JSON.stringify({
-          body: req,
+          body: [req.user_id, [req.latitude, req.longitude]],
         });
 
         fetch('http://localhost:3000/proyect/tracking', {
@@ -90,26 +88,26 @@ export class TrackingService {
           .then((result) => result.json())
           .then((jsonformat) => console.log(jsonformat));
       };
-      // const tracking_min = new Promise((cb: any): void => {
-      //   req[10].user_id;
-      //   [req[10].latitude, req[10].longitude];
-      //   const postData = JSON.stringify({
-      //     body: req,
-      //   });
+      const tracking_min = new Promise((cb: any): void => {
+        req.user_id;
+        [req.latitude, req.longitude];
+        const postData = JSON.stringify({
+          body: req,
+        });
 
-      //   fetch(`${url}/v1/${app}/tracking_min`, {
-      //     method: 'POST',
-      //     body: postData,
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //       apikey: apiKey,
-      //     },
-      //   })
-      //     .then((result) => result.json())
-      //     .then((jsonformat) => console.log(jsonformat));
-      //   (err: any, result: any, body: any) => {};
-      //   cb();
-      // });
+        fetch(`${url}/v1/${app}/tracking_min`, {
+          method: 'POST',
+          body: postData,
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: apiKey,
+          },
+        })
+          .then((result) => result.json())
+          .then((jsonformat) => console.log(jsonformat));
+        (err: any, result: any, body: any) => {};
+        cb();
+      });
 
       // const time = new Promise((cb: any): any => {
       //   if (heal >= global._min_time_minutes_for_disconnected) {
@@ -150,13 +148,8 @@ export class TrackingService {
       //});
       const p = new Promise((resolve, reject) => resolve(loccation));
       const p2 = new Promise((resolve, reject) => resolve(tracking));
-      Promise.allSettled([
-        p,
-        p2,
-        //tracking_min,
-        //time,
-        //newFulfillemnt
-      ])
+      const p3 = new Promise((resolve, reject) => resolve(tracking_min));
+      Promise.allSettled([p, p2, p3])
         .then((responses) => {
           // if (_.get(results, 'tracking.error')) {
           //   return res.status(HttpStatus.BAD_REQUEST).send(results);
